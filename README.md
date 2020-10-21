@@ -14,6 +14,10 @@ $ stack exec text-aligner-exe # Executes the project
 $ stack ghci # Runs the GHCI for the project
 ```
 
+## Curso
+
+Lenguajes de programación
+
 ## Application info
 
 ### Version
