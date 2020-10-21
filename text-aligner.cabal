@@ -1,0 +1,61 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: a4e7c5b8695505f53bdd72e30e7e68df1041bb7fdd01dfeb55ce7265005845b9
+
+name:           text-aligner
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/aguilarandress/text-aligner#readme>
+homepage:       https://github.com/aguilarandress/text-aligner#readme
+bug-reports:    https://github.com/aguilarandress/text-aligner/issues
+author:         Andrés Aguilar Moya
+maintainer:     Andrés Aguilar Moya
+copyright:      2020 Andrés Aguilar Moya
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/aguilarandress/text-aligner
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_text_aligner
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable text-aligner-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_text_aligner
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , text-aligner
+  default-language: Haskell2010
+
+test-suite text-aligner-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_text_aligner
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , text-aligner
+  default-language: Haskell2010
