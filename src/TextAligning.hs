@@ -72,3 +72,8 @@ lineLength :: Line -> Int
 lineLength [] = 0
 lineLength (x : xs) =
   tokenLength x + lineLength xs
+
+-- Function #5
+breakLinke :: Int -> Line -> (Line, Line)
+breakLinke lineLimit line
+  | line == [] = ([], [])
