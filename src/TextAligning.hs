@@ -1,42 +1,54 @@
 module TextAligning where
 
 import Data.List ()
-import DataTypes (Line, Token (..))
+import qualified Data.Map as Map
+import DataTypes (HypMap, Line, Token (..))
 
--- Converts a token to a string
+-- @params  Recibe un token
+-- @desc    Convierte un token en su versión de string
+-- @returns El token convertido en string
 tokenToString :: Token -> String
 tokenToString (Word token) = token ++ " "
 tokenToString (Blank) = " "
 tokenToString (HypWord hypWord) = hypWord ++ "- "
 
--- Funcion #1
--- Casts a string to a line
+-- @params  Recibe un String
+-- @desc    Convierte un String en una Line (Funcion A)
+-- @returns El string convertido en una Line
 string2line :: String -> Line
 string2line texto =
   if length (texto) == 0
     then []
     else map Word (splitString texto)
 
--- Splits a string into a list of strings
+-- @params  Recibe un String
+-- @desc    Toma un string y lo separa por espacios en una lista de strings
+-- @returns La lista de strings seprados por espacios
 splitString :: String -> [String]
 splitString [] = []
 splitString (x : xs)
   | isBlank x = splitString xs
+  -- TODO: Comentar esta seccion
   | otherwise = waitForBlank (x : xs) : splitString (drop (length (waitForBlank (x : xs))) xs)
 
--- Checks if character is a space
+-- @params  Recibe un char
+-- @desc    Verifica si el char es un espacio en blanco
+-- @returns Un valor booleano que determina si el char es un espacio en blanco
 isBlank :: Char -> Bool
-isBlank currentChar = if currentChar == ' ' then True else False
+isBlank char = if char == ' ' then True else False
 
--- Loops through string until a space
+-- @params  Recibe un String
+-- @desc    Toma un string e itera sobre el hasta encontrar un espacio en blanco
+-- @returns La seccioón del string hasta un espacio
 waitForBlank :: String -> String
 waitForBlank [] = []
 waitForBlank (x : xs)
   | isBlank x = []
   | otherwise = x : waitForBlank xs
 
--- Function #2
--- Casts a line to a string
+-- @params  Recibe una Line
+-- @desc    Toma una line y lo convierte en un string
+-- @returns El string formado a partir de una line
 line2string :: Line -> String
 line2string [] = ""
 line2string line =
@@ -69,10 +81,11 @@ tokenLength Blank = 1
 tokenLength token = length (tokenToString token) - 1
 
 -- Function #4
+-- TODO: Agregar suma de espacios entre palabras
 lineLength :: Line -> Int
-lineLength [] = 0
+lineLength [] = -1
 lineLength (x : xs) =
-  tokenLength x + lineLength xs
+  tokenLength x + 1 + lineLength xs
 
 -- Function #5
 breakLine :: Int -> Line -> (Line, Line)
@@ -89,13 +102,15 @@ breakLine lineLimit line
 -- Dado un limite de tokens retorna una lista
 -- con un maximo de palabras
 concatTokensWithLimit :: Line -> Int -> Int -> Line
-concatTokensWithLimit [] limit currentLength = []
-concatTokensWithLimit (x : xs) limit currentLength =
-  let headLength = length (tokenToString x) - 1
-      newLength = headLength + currentLength
-   in if currentLength + headLength > limit
-        then []
-        else (x : concatTokensWithLimit (xs) (limit) (newLength))
+concatTokensWithLimit (x : xs) limit currentLength
+  | (x : xs) == [] = []
+  | otherwise =
+    if currentLength + headLength > limit
+      then []
+      else (x : concatTokensWithLimit (xs) (limit) (newLength))
+  where
+    headLength = length (tokenToString x) - 1
+    newLength = headLength + currentLength
 
 -- Function #6
 mergers :: [String] -> [(String, String)]
@@ -123,3 +138,11 @@ joinStringsFromIndex stringList index
     if index >= length stringList
       then ""
       else (stringList !! index) ++ joinStringsFromIndex (stringList) (index + 1)
+
+enHyp :: HypMap
+enHyp =
+  Map.fromList
+    [ ("controla", ["con", "tro", "la"]),
+      ("futuro", ["fu", "tu", "ro"]),
+      ("presente", ["pre", "sen", "te"])
+    ]
