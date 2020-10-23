@@ -46,6 +46,7 @@ line2string line =
         else stringResult
 
 -- Concats tokens into a string
+-- TODO: Revisar esta function en caso de lista vacia
 concatTokens ::
   Line ->
   Int ->
@@ -74,6 +75,24 @@ lineLength (x : xs) =
   tokenLength x + lineLength xs
 
 -- Function #5
-breakLinke :: Int -> Line -> (Line, Line)
-breakLinke lineLimit line
+breakLine :: Int -> Line -> (Line, Line)
+breakLine lineLimit line
   | line == [] = ([], [])
+  | otherwise =
+    if lineLength line <= lineLimit
+      then (line, [])
+      else (limittedLine, rest)
+  where
+    limittedLine = concatTokensWithLimit line lineLimit 0
+    rest = drop (length limittedLine) line
+
+-- Dado un limite de tokens retorna una lista
+-- con un maximo de palabras
+concatTokensWithLimit :: Line -> Int -> Int -> Line
+concatTokensWithLimit [] limit currentLength = []
+concatTokensWithLimit (x : xs) limit currentLength =
+  let headLength = length (tokenToString x) - 1
+      newLength = headLength + currentLength
+   in if currentLength + headLength > limit
+        then []
+        else (x : concatTokensWithLimit (xs) (limit) (newLength))
