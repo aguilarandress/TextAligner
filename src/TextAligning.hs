@@ -96,3 +96,30 @@ concatTokensWithLimit (x : xs) limit currentLength =
    in if currentLength + headLength > limit
         then []
         else (x : concatTokensWithLimit (xs) (limit) (newLength))
+
+-- Function #6
+mergers :: [String] -> [(String, String)]
+mergers [] = []
+mergers stringList
+  | length stringList == 1 = []
+  | otherwise = getTotalConcats stringList 0
+
+-- Obtiene todos los concats posibles de una lista de strings
+getTotalConcats :: [String] -> Int -> [(String, String)]
+getTotalConcats strings index
+  | strings == [] = []
+  | otherwise =
+    if index >= length (strings) - 1
+      then []
+      else
+        [(joinStringsFromIndex (take (index + 1) (strings)) (0), joinStringsFromIndex (strings) (index + 1))]
+          ++ getTotalConcats strings (index + 1)
+
+-- Concatena todos los strings de una lista desde un indice dado
+joinStringsFromIndex :: [String] -> Int -> String
+joinStringsFromIndex stringList index
+  | stringList == [] = []
+  | otherwise =
+    if index >= length stringList
+      then ""
+      else (stringList !! index) ++ joinStringsFromIndex (stringList) (index + 1)
