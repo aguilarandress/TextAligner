@@ -155,9 +155,22 @@ enHyp =
 hyphenate :: HypMap -> Token -> [(Token, Token)]
 hyphenate diccionario word =
   let stringCombinations = mergers (diccionario Map.! (tokenToString' word))
+      hyphennedWords = map convertToHyphennedWord stringCombinations
    in if Map.member (tokenToString' word) diccionario
-        then map convertToHyphennedWord stringCombinations
-        else [(Word "XDn't", Word "xd")]
+        then hyphennedWords
+        else []
+
+extractPunctuation :: String -> String
+extractPunctuation [] = []
+extractPunctuation (x : xs)
+  | x == '.' = ""
+  | otherwise = [x] ++ extractPunctuation xs
+
+getPunctuation :: String -> String
+getPunctuation [] = []
+getPunctuation (x : xs)
+  | x == '.' = "." ++ getPunctuation xs
+  | otherwise = getPunctuation xs
 
 convertToHyphennedWord :: (String, String) -> (Token, Token)
 convertToHyphennedWord (" ", " ") = (Blank, Blank)
