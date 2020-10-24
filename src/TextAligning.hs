@@ -154,11 +154,23 @@ enHyp =
 
 hyphenate :: HypMap -> Token -> [(Token, Token)]
 hyphenate diccionario word =
-  let stringCombinations = mergers (diccionario Map.! (tokenToString' word))
+  let wordWithoutPunctuation = extractPunctuation (tokenToString' word)
+      -- Obtener combinaciones de los strings con el map
+      stringCombinations = mergers (diccionario Map.! wordWithoutPunctuation)
+      -- Crear palabras con el hyphen
       hyphennedWords = map convertToHyphennedWord stringCombinations
-   in if Map.member (tokenToString' word) diccionario
-        then hyphennedWords
+   in -- Verificar que la palabra que se encuentre en el diccionario
+      if Map.member wordWithoutPunctuation diccionario
+        then -- Agregar signos de puntuacion originales
+          addPunctuation hyphennedWords (getPunctuation (tokenToString' word))
         else []
+
+addPunctuation :: [(Token, Token)] -> String -> [(Token, Token)]
+addPunctuation [] _ = []
+addPunctuation (x : xs) punctuation =
+  -- Agregar puntuacion a la palabra
+  let newWord = Word (tokenToString' (snd x) ++ punctuation)
+   in (fst x, newWord) : addPunctuation xs punctuation
 
 extractPunctuation :: String -> String
 extractPunctuation [] = []
