@@ -1,6 +1,7 @@
 module TextAligning where
 
 import Data.List ()
+import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
 
@@ -11,6 +12,11 @@ tokenToString :: Token -> String
 tokenToString (Word token) = token ++ " "
 tokenToString (Blank) = " "
 tokenToString (HypWord hypWord) = hypWord ++ "- "
+
+tokenToString' :: Token -> String
+tokenToString' (Word token) = token
+tokenToString' (Blank) = " "
+tokenToString' (HypWord hypWord) = hypWord
 
 -- @params  Recibe un String
 -- @desc    Convierte un String en una Line (Funcion A)
@@ -28,8 +34,9 @@ splitString :: String -> [String]
 splitString [] = []
 splitString (x : xs)
   | isBlank x = splitString xs
-  -- TODO: Comentar esta seccion
-  | otherwise = waitForBlank (x : xs) : splitString (drop (length (waitForBlank (x : xs))) xs)
+  | otherwise = waitForBlank (x : xs) : splitString (restOfTheString)
+  where
+    restOfTheString = drop (length (waitForBlank (x : xs))) xs
 
 -- @params  Recibe un char
 -- @desc    Verifica si el char es un espacio en blanco
@@ -58,7 +65,6 @@ line2string line =
         else stringResult
 
 -- Concats tokens into a string
--- TODO: Revisar esta function en caso de lista vacia
 concatTokens ::
   Line ->
   Int ->
@@ -81,7 +87,6 @@ tokenLength Blank = 1
 tokenLength token = length (tokenToString token) - 1
 
 -- Function #4
--- TODO: Agregar suma de espacios entre palabras
 lineLength :: Line -> Int
 lineLength [] = -1
 lineLength (x : xs) =
@@ -146,3 +151,15 @@ enHyp =
       ("futuro", ["fu", "tu", "ro"]),
       ("presente", ["pre", "sen", "te"])
     ]
+
+hyphenate :: HypMap -> Token -> [(Token, Token)]
+hyphenate diccionario word =
+  let stringCombinations = mergers (diccionario Map.! (tokenToString' word))
+   in if Map.member (tokenToString' word) diccionario
+        then map convertToHyphennedWord stringCombinations
+        else [(Word "XDn't", Word "xd")]
+
+convertToHyphennedWord :: (String, String) -> (Token, Token)
+convertToHyphennedWord (" ", " ") = (Blank, Blank)
+convertToHyphennedWord stringTuple =
+  (HypWord (fst stringTuple), Word (snd stringTuple))
