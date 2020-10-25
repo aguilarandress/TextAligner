@@ -202,8 +202,17 @@ insertBlanks _ [] = []
 insertBlanks numberOfBlanks line
   | length line == 1 = line
   | otherwise =
-    let listOfBlanks = [[] | i <- [1 .. ((length line) - 1)]]
-     in []
+    let blanksPlaceholder = [[] | i <- [1 .. ((length line) - 1)]]
+        blanksList = createBlanks blanksPlaceholder numberOfBlanks 0
+     in addBlanksToWords line blanksList 0
+
+addBlanksToWords :: Line -> [[Token]] -> Int -> Line
+addBlanksToWords [] _ _ = []
+addBlanksToWords line [] _ = line
+addBlanksToWords (x : xs) blanks currentIndex =
+  if xs == []
+    then [x]
+    else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
 
 createBlanks :: [[Token]] -> Int -> Int -> [[Token]]
 createBlanks [] _ _ = []
