@@ -4,6 +4,7 @@ import Data.List ()
 import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
+import Utils ()
 
 -- @params  Recibe un token
 -- @desc    Convierte un token en su versión de string
@@ -152,6 +153,7 @@ enHyp =
       ("presente", ["pre", "sen", "te"])
     ]
 
+-- Function #7
 hyphenate :: HypMap -> Token -> [(Token, Token)]
 hyphenate diccionario word =
   let wordWithoutPunctuation = extractPunctuation (tokenToString' word)
@@ -188,3 +190,28 @@ convertToHyphennedWord :: (String, String) -> (Token, Token)
 convertToHyphennedWord (" ", " ") = (Blank, Blank)
 convertToHyphennedWord stringTuple =
   (HypWord (fst stringTuple), Word (snd stringTuple))
+
+-- Function 8
+lineBreaks :: HypMap -> Int -> Line -> [(Line, Line)]
+lineBreaks diccionario limit line =
+  [([Word "Hello"], [Word "World"])]
+
+insertBlanks :: Int -> Line -> Line
+insertBlanks 0 line = line
+insertBlanks _ [] = []
+insertBlanks numberOfBlanks line
+  | length line == 1 = line
+  | otherwise =
+    let listOfBlanks = [[] | i <- [1 .. ((length line) - 1)]]
+     in []
+
+createBlanks :: [[Token]] -> Int -> Int -> [[Token]]
+createBlanks [] _ _ = []
+createBlanks listOfBlanks numberOfBlanks currentIndex
+  | numberOfBlanks == 0 = listOfBlanks
+  | otherwise =
+    let currentElement = listOfBlanks !! currentIndex
+        newListOfBlanks = (take currentIndex listOfBlanks) ++ [currentElement ++ [Blank]] ++ (drop (currentIndex + 1) listOfBlanks)
+     in if (length listOfBlanks) - 1 == currentIndex
+          then createBlanks (newListOfBlanks) (numberOfBlanks - 1) 0
+          else createBlanks (newListOfBlanks) (numberOfBlanks - 1) (currentIndex + 1)
