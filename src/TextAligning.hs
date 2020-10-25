@@ -4,7 +4,6 @@ import Data.List ()
 import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
-import Utils ()
 
 -- @params  Recibe un token
 -- @desc    Convierte un token en su versión de string
