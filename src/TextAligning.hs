@@ -45,30 +45,15 @@ string2line texto = map Word (splitString texto)
         restOfTheString = drop (length (waitForBlank (x : xs))) xs
 
 -- Recibe una line y la convierte en su forma de string (Funcion B)
--- TODO: Ver si se puede utilizar la funcion join de Utils
 line2string :: Line -> String
 line2string [] = []
-line2string line = concatTokens (line) (0) (length line)
+line2string line = take ((length stringResult) - 1) stringResult
   where
-    -- Toma los tokens de una line y los concatena
-    concatTokens ::
-      Line ->
-      Int ->
-      Int ->
-      String
-    concatTokens [] _ _ = []
-    concatTokens (x : xs) (currentIndex) lineLength
-      -- Verificar si se llego al final del string
-      | currentIndex == lineLength - 1 =
-        if tokenToString (x) == " "
-          then []
-          else tokenToString' x
-      -- Verificar si hay un espacio al inicio
-      | tokenToString x == " " && currentIndex == 0 =
-        -- Ignorar espacio al inicio
-        concatTokens (xs) (currentIndex + 1) lineLength
-      -- Continuar concatenando
-      | otherwise = (tokenToString x) ++ concatTokens (xs) (currentIndex + 1) (lineLength)
+    -- Eliminar blancos al inicio
+    lineWithoutBlanksAtStart = dropWhile (== Blank) (line)
+    -- Eliminar blancos al final
+    lineWithoutBlanksAtEnd = reverse (dropWhile (== Blank) (reverse lineWithoutBlanksAtStart))
+    stringResult = concat (map tokenToString lineWithoutBlanksAtEnd)
 
 -- Determina el largo de un token (Funcion C)
 tokenLength :: Token -> Int
@@ -125,8 +110,8 @@ mergers stringList
         then []
         else (leftSideConcat, rightSideConcat) : getTotalConcats strings (index + 1)
       where
-        leftSideConcat = join "" (take (index + 1) (strings))
-        rightSideConcat = join "" (drop (index + 1) (strings))
+        leftSideConcat = concat (take (index + 1) (strings))
+        rightSideConcat = concat (drop (index + 1) (strings))
 
 enHyp :: HypMap
 enHyp =
@@ -170,7 +155,6 @@ getPunctuation (x : xs)
   | otherwise = getPunctuation xs
 
 convertToHyphennedWord :: (String, String) -> (Token, Token)
--- convertToHyphennedWord (" ", " ") = (Blank, Blank) -- ?
 convertToHyphennedWord stringTuple =
   (HypWord (fst stringTuple), Word (snd stringTuple))
 
