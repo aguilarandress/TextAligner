@@ -29,6 +29,7 @@ library
       Lib
     , DataTypes
     , TextAligning
+    , Utils
   other-modules:
       Paths_text_aligner
   hs-source-dirs:

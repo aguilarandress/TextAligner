@@ -106,7 +106,8 @@ breakLine lineLimit line =
         -- Nuevo largo = currentLength + tokenActual + el espacio
         newLength = headLength + currentLength
 
--- Function #6
+-- Recibe una lista de strings y genera todas las formas de concatenarlas
+-- (Funcion F)
 mergers :: [String] -> [(String, String)]
 mergers [] = []
 mergers stringList
@@ -115,14 +116,13 @@ mergers stringList
 
 -- Obtiene todos los concats posibles de una lista de strings
 getTotalConcats :: [String] -> Int -> [(String, String)]
-getTotalConcats strings index
-  | strings == [] = []
-  | otherwise =
-    if index >= length (strings) - 1
-      then []
-      else
-        [(joinStringsFromIndex (take (index + 1) (strings)) (0), joinStringsFromIndex (strings) (index + 1))]
-          ++ getTotalConcats strings (index + 1)
+getTotalConcats [] _ = []
+getTotalConcats strings index =
+  if index >= length (strings) - 1
+    then []
+    else
+      [(joinStringsFromIndex (take (index + 1) (strings)) (0), joinStringsFromIndex (strings) (index + 1))]
+        ++ getTotalConcats strings (index + 1)
 
 -- Concatena todos los strings de una lista desde un indice dado
 joinStringsFromIndex :: [String] -> Int -> String
