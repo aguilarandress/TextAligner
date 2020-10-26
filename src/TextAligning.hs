@@ -17,7 +17,7 @@ tokenToString (HypWord hypWord) = hypWord ++ "- "
 tokenToString' :: Token -> String
 tokenToString' (Word token) = token
 tokenToString' (Blank) = " "
-tokenToString' (HypWord hypWord) = hypWord
+tokenToString' (HypWord hypWord) = hypWord ++ "-"
 
 -- Convierte un string en una line (Funcion A)
 string2line :: String -> Line
@@ -43,39 +43,34 @@ string2line texto = map Word (splitString texto)
         -- Se toma el string desde el espacio encontrado
         restOfTheString = drop (length (waitForBlank (x : xs))) xs
 
--- @params  Recibe una Line
--- @desc    Toma una line y lo convierte en un string
--- @returns El string formado a partir de una line
+-- Recibe una line y la convierte en su forma de string (Funcion B)
 line2string :: Line -> String
-line2string [] = ""
-line2string line =
-  let stringResult = concatTokens (line) (0) (length line)
-   in if last stringResult == ' '
-        then drop 0 (take (length (stringResult) - 1) (stringResult))
-        else stringResult
+line2string [] = []
+line2string line = concatTokens (line) (0) (length line)
+  where
+    -- Toma los tokens de una line y los concatena
+    concatTokens ::
+      Line ->
+      Int ->
+      Int ->
+      String
+    concatTokens [] _ _ = []
+    concatTokens (x : xs) (currentIndex) lineLength
+      -- Verificar si se llego al final del string
+      | currentIndex == lineLength - 1 =
+        if tokenToString (x) == " "
+          then []
+          else tokenToString' x
+      -- Verificar si hay un espacio al inicio
+      | tokenToString x == " " && currentIndex == 0 =
+        -- Ignorar espacio al inicio
+        concatTokens (xs) (currentIndex + 1) lineLength
+      -- Continuar concatenando
+      | otherwise = (tokenToString x) ++ concatTokens (xs) (currentIndex + 1) (lineLength)
 
--- Concats tokens into a string
-concatTokens ::
-  Line ->
-  Int ->
-  Int ->
-  String
-concatTokens [] _ _ = []
-concatTokens (x : xs) (currentIndex) lineLength
-  | (x : xs) == [] = [] -- TODO: Eliminar esto
-  | currentIndex == lineLength - 1 =
-    if tokenToString (x) == " "
-      then ""
-      else drop 0 (take (length (tokenToString x) - 1) (tokenToString x))
-  | otherwise =
-    if (tokenToString x == " " && currentIndex == 0)
-      then concatTokens (xs) (currentIndex + 1) lineLength
-      else (tokenToString x) ++ concatTokens (xs) (currentIndex + 1) lineLength
-
--- Function #3
+-- Determina el largo de un token (Funcion C)
 tokenLength :: Token -> Int
-tokenLength Blank = 1
-tokenLength token = length (tokenToString token) - 1
+tokenLength token = length (tokenToString' token)
 
 -- Function #4
 lineLength :: Line -> Int
