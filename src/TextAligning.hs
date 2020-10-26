@@ -72,37 +72,39 @@ line2string line = concatTokens (line) (0) (length line)
 tokenLength :: Token -> Int
 tokenLength token = length (tokenToString' token)
 
--- Function #4
+-- Determina el largo de una line (Funcion D)
 lineLength :: Line -> Int
 lineLength [] = -1
-lineLength (x : xs) =
-  tokenLength x + 1 + lineLength xs
+lineLength (x : xs) = tokenLength x + 1 + lineLength xs
 
--- Function #5
+-- Recibe una linea y un limite
+-- Parte una linea de modo que no sea mas
+-- larga que una longitud dada (Funcion E)
 breakLine :: Int -> Line -> (Line, Line)
-breakLine lineLimit line
-  | line == [] = ([], [])
-  | otherwise =
-    if lineLength line <= lineLimit
-      then (line, [])
-      else (limittedLine, rest)
+breakLine _ [] = ([], [])
+breakLine lineLimit line =
+  if lineLength line <= lineLimit
+    then (line, [])
+    else (limittedLine, rest)
   where
+    -- Obtener la linea que cumple con el limite
     limittedLine = concatTokensWithLimit line lineLimit 0
+    -- Eliminar la linea limitada de la original para obtener el resto
     rest = drop (length limittedLine) line
-
--- Dado un limite de tokens retorna una lista
--- con un maximo de palabras
-concatTokensWithLimit :: Line -> Int -> Int -> Line
-concatTokensWithLimit [] _ _ = []
-concatTokensWithLimit (x : xs) limit currentLength
-  | (x : xs) == [] = [] -- TODO: Eliminar esta parte
-  | otherwise =
-    if currentLength + (headLength - 1) > limit
-      then []
-      else (x : concatTokensWithLimit (xs) (limit) (newLength))
-  where
-    headLength = length (tokenToString x)
-    newLength = headLength + currentLength
+    -- Dado un limite de tokens retorna una lista
+    -- con un maximo de palabras
+    concatTokensWithLimit :: Line -> Int -> Int -> Line
+    concatTokensWithLimit [] _ _ = []
+    concatTokensWithLimit (x : xs) limit currentLength =
+      -- Verificar que el largo actual con el largo del token no sea mayor
+      if currentLength + (headLength - 1) > limit
+        then []
+        else (x : concatTokensWithLimit (xs) (limit) (newLength))
+      where
+        -- Obtener el largo de la cabeza de la lista
+        headLength = length (tokenToString x)
+        -- Nuevo largo = currentLength + tokenActual + el espacio
+        newLength = headLength + currentLength
 
 -- Function #6
 mergers :: [String] -> [(String, String)]
