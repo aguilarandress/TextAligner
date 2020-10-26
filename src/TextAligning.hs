@@ -4,6 +4,7 @@ import Data.List ()
 import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
+import Utils (join)
 
 -- Recibe un token y lo convierte en su version de string
 -- Retorna el token con un espacio al final
@@ -44,6 +45,7 @@ string2line texto = map Word (splitString texto)
         restOfTheString = drop (length (waitForBlank (x : xs))) xs
 
 -- Recibe una line y la convierte en su forma de string (Funcion B)
+-- TODO: Ver si se puede utilizar la funcion join de Utils
 line2string :: Line -> String
 line2string [] = []
 line2string line = concatTokens (line) (0) (length line)
@@ -113,25 +115,18 @@ mergers [] = []
 mergers stringList
   | length stringList == 1 = []
   | otherwise = getTotalConcats stringList 0
-
--- Obtiene todos los concats posibles de una lista de strings
-getTotalConcats :: [String] -> Int -> [(String, String)]
-getTotalConcats [] _ = []
-getTotalConcats strings index =
-  if index >= length (strings) - 1
-    then []
-    else
-      [(joinStringsFromIndex (take (index + 1) (strings)) (0), joinStringsFromIndex (strings) (index + 1))]
-        ++ getTotalConcats strings (index + 1)
-
--- Concatena todos los strings de una lista desde un indice dado
-joinStringsFromIndex :: [String] -> Int -> String
-joinStringsFromIndex stringList index
-  | stringList == [] = []
-  | otherwise =
-    if index >= length stringList
-      then ""
-      else (stringList !! index) ++ joinStringsFromIndex (stringList) (index + 1)
+  where
+    -- Obtiene todos los concats posibles de una lista de strings
+    getTotalConcats :: [String] -> Int -> [(String, String)]
+    getTotalConcats [] _ = []
+    getTotalConcats strings index =
+      -- Detenerse cuando se llega al ultimo elemento
+      if index >= length (strings) - 1
+        then []
+        else (leftSideConcat, rightSideConcat) : getTotalConcats strings (index + 1)
+      where
+        leftSideConcat = join "" (take (index + 1) (strings))
+        rightSideConcat = join "" (drop (index + 1) (strings))
 
 enHyp :: HypMap
 enHyp =
