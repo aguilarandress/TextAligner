@@ -6,13 +6,16 @@ import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
 
 -- @params  Recibe un token
--- @desc    Convierte un token en su versión de string
+-- @desc    Convierte un token en su versión de string (con un espacio)
 -- @returns El token convertido en string
 tokenToString :: Token -> String
 tokenToString (Word token) = token ++ " "
 tokenToString (Blank) = " "
 tokenToString (HypWord hypWord) = hypWord ++ "- "
 
+-- @params  Recibe un token
+-- @desc    Convierte un token en su versión de string (sin espacio al final)
+-- @returns El token convertido en string
 tokenToString' :: Token -> String
 tokenToString' (Word token) = token
 tokenToString' (Blank) = " "
@@ -70,8 +73,9 @@ concatTokens ::
   Int ->
   Int ->
   String
+concatTokens [] _ _ = []
 concatTokens (x : xs) (currentIndex) lineLength
-  | (x : xs) == [] = []
+  | (x : xs) == [] = [] -- TODO: Eliminar esto
   | currentIndex == lineLength - 1 =
     if tokenToString (x) == " "
       then ""
@@ -107,14 +111,15 @@ breakLine lineLimit line
 -- Dado un limite de tokens retorna una lista
 -- con un maximo de palabras
 concatTokensWithLimit :: Line -> Int -> Int -> Line
+concatTokensWithLimit [] _ _ = []
 concatTokensWithLimit (x : xs) limit currentLength
-  | (x : xs) == [] = []
+  | (x : xs) == [] = [] -- TODO: Eliminar esta parte
   | otherwise =
-    if currentLength + headLength > limit
+    if currentLength + (headLength - 1) > limit
       then []
       else (x : concatTokensWithLimit (xs) (limit) (newLength))
   where
-    headLength = length (tokenToString x) - 1
+    headLength = length (tokenToString x)
     newLength = headLength + currentLength
 
 -- Function #6
@@ -186,15 +191,37 @@ getPunctuation (x : xs)
   | otherwise = getPunctuation xs
 
 convertToHyphennedWord :: (String, String) -> (Token, Token)
-convertToHyphennedWord (" ", " ") = (Blank, Blank)
+-- convertToHyphennedWord (" ", " ") = (Blank, Blank) -- ?
 convertToHyphennedWord stringTuple =
   (HypWord (fst stringTuple), Word (snd stringTuple))
 
 -- Function 8
 lineBreaks :: HypMap -> Int -> Line -> [(Line, Line)]
-lineBreaks diccionario limit line =
-  [([Word "Hello"], [Word "World"])]
+lineBreaks _ 0 _ = []
+lineBreaks _ _ [] = []
+lineBreaks diccionario limit line
+  -- Si el limite es mayor a la line, se retorna la misma linea
+  | limit >= lineLength line = [(line, [])]
+  | otherwise =
+    -- Obtener linea partida con breakLine
+    let splittedLine = breakLine limit line
+        -- Obtener la palabra que se va a partir
+        wordToBeHyphenned = head (snd splittedLine)
+        -- Utilizar hyphenate para buscar las posibles formas de partir la palabra
+        posibleHyphens = hyphenate diccionario wordToBeHyphenned
+     in -- Verificar si no hay manera de partir la ultima palabra
+        if posibleHyphens == []
+          then [splittedLine]
+          else splittedLine : (filter (\x -> lineLength (fst x) <= limit) (addHyphensToSplittedLine splittedLine posibleHyphens))
 
+addHyphensToSplittedLine :: (Line, Line) -> [(Token, Token)] -> [(Line, Line)]
+addHyphensToSplittedLine _ [] = []
+addHyphensToSplittedLine splittedLine (x : xs) =
+  let leftSideOfLine = fst splittedLine ++ [fst x]
+      rightSideOfLine = [snd x] ++ drop 1 (snd splittedLine)
+   in (leftSideOfLine, rightSideOfLine) : (addHyphensToSplittedLine splittedLine xs)
+
+-- Function #9
 insertBlanks :: Int -> Line -> Line
 insertBlanks 0 line = line
 insertBlanks _ [] = []
@@ -204,14 +231,6 @@ insertBlanks numberOfBlanks line
     let blanksPlaceholder = [[] | i <- [1 .. ((length line) - 1)]]
         blanksList = createBlanks blanksPlaceholder numberOfBlanks 0
      in addBlanksToWords line blanksList 0
-
-addBlanksToWords :: Line -> [[Token]] -> Int -> Line
-addBlanksToWords [] _ _ = []
-addBlanksToWords line [] _ = line
-addBlanksToWords (x : xs) blanks currentIndex =
-  if xs == []
-    then [x]
-    else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
 
 createBlanks :: [[Token]] -> Int -> Int -> [[Token]]
 createBlanks [] _ _ = []
@@ -223,3 +242,11 @@ createBlanks listOfBlanks numberOfBlanks currentIndex
      in if (length listOfBlanks) - 1 == currentIndex
           then createBlanks (newListOfBlanks) (numberOfBlanks - 1) 0
           else createBlanks (newListOfBlanks) (numberOfBlanks - 1) (currentIndex + 1)
+
+addBlanksToWords :: Line -> [[Token]] -> Int -> Line
+addBlanksToWords [] _ _ = []
+addBlanksToWords line [] _ = line
+addBlanksToWords (x : xs) blanks currentIndex =
+  if xs == []
+    then [x]
+    else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
