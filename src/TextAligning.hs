@@ -5,56 +5,43 @@ import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
 
--- @params  Recibe un token
--- @desc    Convierte un token en su versión de string (con un espacio)
--- @returns El token convertido en string
+-- Recibe un token y lo convierte en su version de string
+-- Retorna el token con un espacio al final
 tokenToString :: Token -> String
 tokenToString (Word token) = token ++ " "
 tokenToString (Blank) = " "
 tokenToString (HypWord hypWord) = hypWord ++ "- "
 
--- @params  Recibe un token
--- @desc    Convierte un token en su versión de string (sin espacio al final)
--- @returns El token convertido en string
+-- Recibe un token y lo convierte en su version de string
+-- Retorna el token con un espacio al final
 tokenToString' :: Token -> String
 tokenToString' (Word token) = token
 tokenToString' (Blank) = " "
 tokenToString' (HypWord hypWord) = hypWord
 
--- @params  Recibe un String
--- @desc    Convierte un String en una Line (Funcion A)
--- @returns El string convertido en una Line
+-- Convierte un string en una line (Funcion A)
 string2line :: String -> Line
-string2line texto =
-  if length (texto) == 0
-    then []
-    else map Word (splitString texto)
-
--- @params  Recibe un String
--- @desc    Toma un string y lo separa por espacios en una lista de strings
--- @returns La lista de strings seprados por espacios
-splitString :: String -> [String]
-splitString [] = []
-splitString (x : xs)
-  | isBlank x = splitString xs
-  | otherwise = waitForBlank (x : xs) : splitString (restOfTheString)
+string2line [] = []
+string2line texto = map Word (splitString texto)
   where
-    restOfTheString = drop (length (waitForBlank (x : xs))) xs
-
--- @params  Recibe un char
--- @desc    Verifica si el char es un espacio en blanco
--- @returns Un valor booleano que determina si el char es un espacio en blanco
-isBlank :: Char -> Bool
-isBlank char = if char == ' ' then True else False
-
--- @params  Recibe un String
--- @desc    Toma un string e itera sobre el hasta encontrar un espacio en blanco
--- @returns La seccioón del string hasta un espacio
-waitForBlank :: String -> String
-waitForBlank [] = []
-waitForBlank (x : xs)
-  | isBlank x = []
-  | otherwise = x : waitForBlank xs
+    -- Verifica si el char es un espacio en blanco (un blank)
+    isBlank :: Char -> Bool
+    isBlank char = if char == ' ' then True else False
+    -- Obtiene el substring antes de un espacio
+    waitForBlank :: String -> String
+    waitForBlank [] = []
+    waitForBlank (x : xs)
+      | isBlank x = []
+      | otherwise = x : waitForBlank xs
+    -- Toma un string y lo separa por espacios en blanco
+    splitString :: String -> [String]
+    splitString [] = []
+    splitString (x : xs)
+      | isBlank x = splitString xs
+      | otherwise = waitForBlank (x : xs) : splitString (restOfTheString)
+      where
+        -- Se toma el string desde el espacio encontrado
+        restOfTheString = drop (length (waitForBlank (x : xs))) xs
 
 -- @params  Recibe una Line
 -- @desc    Toma una line y lo convierte en un string
