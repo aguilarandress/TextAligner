@@ -59,6 +59,7 @@ line2string line = take ((length stringResult) - 1) stringResult
 tokenLength :: Token -> Int
 tokenLength token = length (tokenToString' token)
 
+-- TODO: Agregar caso cuando se tiene un blank
 -- Determina el largo de una line (Funcion D)
 lineLength :: Line -> Int
 lineLength [] = -1
@@ -122,6 +123,7 @@ enHyp =
     ]
 
 -- Function #7
+-- TODO: Agregar casos para signos de puntuacion
 hyphenate :: HypMap -> Token -> [(Token, Token)]
 hyphenate diccionario word =
   let wordWithoutPunctuation = extractPunctuation (tokenToString' word)
@@ -147,6 +149,10 @@ extractPunctuation [] = []
 extractPunctuation (x : xs)
   | x == '.' = ""
   | otherwise = [x] ++ extractPunctuation xs
+
+extractPunctuation' :: String -> (String, String)
+extractPunctuation' [] = ([], [])
+extractPunctuation' string = (reverse (dropWhile (== '.') (reverse string)), dropWhile (/= '.') string)
 
 getPunctuation :: String -> String
 getPunctuation [] = []
