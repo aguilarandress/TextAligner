@@ -226,7 +226,7 @@ insertBlanks numberOfBlanks line
             else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
      in addBlanksToWords line blanksList 0
 
--- Funcion separar y alinear
+-- Funcion que recibe recibe un string y lo separa en una lista de strings (Funcion j)
 separarYAlinear :: Int -> BanderaSeparar -> BanderaAjustar -> String -> [String]
 separarYAlinear _ _ _ [] = []
 separarYAlinear limite separar ajustar string
@@ -240,20 +240,22 @@ separarYAlinear limite separar ajustar string
   where
     brokenLines = breakIntoLines limite (string2line string)
     brokenLinesWithHypen = breakIntoLines' limite (string2line string)
-
-adjustLines :: Int -> [Line] -> [Line]
-adjustLines _ [] = []
-adjustLines limit (x : xs) = insertBlanks (limit - (lineLength x)) x : adjustLines limit xs
-
-breakIntoLines :: Int -> Line -> [Line]
-breakIntoLines _ [] = []
-breakIntoLines limit line =
-  let brokenLine = breakLine limit line
-   in (fst brokenLine) : breakIntoLines limit (snd brokenLine)
-
-breakIntoLines' :: Int -> Line -> [Line]
-breakIntoLines' _ [] = []
-breakIntoLines' limit line =
-  let brokenLines = lineBreaks enHyp limit line
-      biggestLine = foldr1 (\x y -> if (length (fst x)) >= (length (fst y)) then x else y) brokenLines
-   in (fst biggestLine) : breakIntoLines' limit (snd biggestLine)
+    -- Ajusta las lineas de manera que encajen con el limite dado
+    adjustLines :: Int -> [Line] -> [Line]
+    adjustLines _ [] = []
+    adjustLines limit (x : xs) = insertBlanks (limit - (lineLength x)) x : adjustLines limit xs
+    -- Separa el string de manera que no sobrepase el limite ingresado
+    -- Esta funcion no separa las palabras
+    breakIntoLines :: Int -> Line -> [Line]
+    breakIntoLines _ [] = []
+    breakIntoLines limit line =
+      let brokenLine = breakLine limit line
+       in (fst brokenLine) : breakIntoLines limit (snd brokenLine)
+    -- Separa el string de manera que no sobrepase el limite ingresado
+    -- Esta funcion separa las palabras
+    breakIntoLines' :: Int -> Line -> [Line]
+    breakIntoLines' _ [] = []
+    breakIntoLines' limit line =
+      let brokenLines = lineBreaks enHyp limit line
+          biggestLine = foldr1 (\x y -> if (length (fst x)) >= (length (fst y)) then x else y) brokenLines
+       in (fst biggestLine) : breakIntoLines' limit (snd biggestLine)
