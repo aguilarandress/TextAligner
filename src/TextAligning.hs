@@ -3,7 +3,7 @@ module TextAligning where
 import Data.List ()
 import Data.Map ()
 import qualified Data.Map as Map
-import DataTypes (HypMap, Line, Token (..))
+import DataTypes (BanderaAjustar (..), BanderaSeparar (..), HypMap, Line, Token (..))
 
 -- Recibe un token y lo convierte en su version de string
 -- Retorna el token con un espacio al final
@@ -27,21 +27,15 @@ string2line texto = map Word (splitString texto)
     -- Verifica si el char es un espacio en blanco (un blank)
     isBlank :: Char -> Bool
     isBlank char = if char == ' ' then True else False
-    -- Obtiene el substring antes de un espacio
-    waitForBlank :: String -> String
-    waitForBlank [] = []
-    waitForBlank (x : xs)
-      | isBlank x = []
-      | otherwise = x : waitForBlank xs
     -- Toma un string y lo separa por espacios en blanco
     splitString :: String -> [String]
     splitString [] = []
     splitString (x : xs)
       | isBlank x = splitString xs
-      | otherwise = waitForBlank (x : xs) : splitString (restOfTheString)
+      | otherwise = (takeWhile (/= ' ') (x : xs)) : splitString (restOfTheString)
       where
         -- Se toma el string desde el espacio encontrado
-        restOfTheString = drop (length (waitForBlank (x : xs))) xs
+        restOfTheString = dropWhile (/= ' ') (x : xs)
 
 -- Recibe una line y la convierte en su forma de string (Funcion B)
 line2string :: Line -> String
@@ -188,7 +182,7 @@ lineBreaks diccionario limit line
           else -- Retornar aquellas lineas que si cumplen con el limite
             splittedLine : (filter (\x -> lineLength (fst x) <= limit) (addHyphensToSplittedLine splittedLine posibleHyphens))
 
--- Recibe un numero de blanks y una line
+-- Recibe un numero de blanks y una line (Funcion i)
 -- Inserta el numero de blanks entre cada token de la line
 insertBlanks :: Int -> Line -> Line
 insertBlanks 0 line = line
@@ -225,3 +219,37 @@ insertBlanks numberOfBlanks line
             then [x]
             else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
      in addBlanksToWords line blanksList 0
+
+-- Funcion que recibe recibe un string y lo separa en una lista de strings (Funcion j)
+separarYAlinear :: Int -> BanderaSeparar -> BanderaAjustar -> String -> [String]
+separarYAlinear _ _ _ [] = []
+separarYAlinear limite separar ajustar string
+  | separar == NOSEPARAR && ajustar == NOAJUSTAR =
+    map line2string (brokenLines)
+  | separar == NOSEPARAR && ajustar == AJUSTAR =
+    map line2string ((adjustLines limite (init brokenLines)) ++ [last brokenLines])
+  | separar == SEPARAR && ajustar == NOAJUSTAR =
+    map line2string (brokenLinesWithHypen)
+  | otherwise = map line2string ((adjustLines limite (init brokenLinesWithHypen)) ++ [last brokenLinesWithHypen])
+  where
+    brokenLines = breakIntoLines limite (string2line string)
+    brokenLinesWithHypen = breakIntoLines' limite (string2line string)
+    -- Ajusta las lineas de manera que encajen con el limite dado
+    adjustLines :: Int -> [Line] -> [Line]
+    adjustLines _ [] = []
+    adjustLines limit (x : xs) = insertBlanks (limit - (lineLength x)) x : adjustLines limit xs
+    -- Separa el string de manera que no sobrepase el limite ingresado
+    -- Esta funcion no separa las palabras
+    breakIntoLines :: Int -> Line -> [Line]
+    breakIntoLines _ [] = []
+    breakIntoLines limit line =
+      let brokenLine = breakLine limit line
+       in (fst brokenLine) : breakIntoLines limit (snd brokenLine)
+    -- Separa el string de manera que no sobrepase el limite ingresado
+    -- Esta funcion separa las palabras
+    breakIntoLines' :: Int -> Line -> [Line]
+    breakIntoLines' _ [] = []
+    breakIntoLines' limit line =
+      let brokenLines = lineBreaks enHyp limit line
+          biggestLine = foldr1 (\x y -> if (length (fst x)) >= (length (fst y)) then x else y) brokenLines
+       in (fst biggestLine) : breakIntoLines' limit (snd biggestLine)

@@ -7,4 +7,10 @@ data Token = Word String | Blank | HypWord String
 
 type HypMap = Map String [String]
 
+data BanderaAjustar = AJUSTAR | NOAJUSTAR
+  deriving (Eq, Show)
+
+data BanderaSeparar = SEPARAR | NOSEPARAR
+  deriving (Eq, Show)
+
 type Line = [Token]
