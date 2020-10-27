@@ -4,7 +4,6 @@ import Data.List ()
 import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap, Line, Token (..))
-import Utils (join)
 
 -- Recibe un token y lo convierte en su version de string
 -- Retorna el token con un espacio al final
@@ -122,7 +121,7 @@ enHyp =
       ("presente", ["pre", "sen", "te"])
     ]
 
--- Recibe un diccionario de palabras y un token
+-- Recibe un diccionario de palabras y un token (Funcion G)
 -- Retorna las palabras de la forma (HypWord, Word)
 -- TODO: Agregar mas casos para signos de puntuacion
 hyphenate :: HypMap -> Token -> [(Token, Token)]
@@ -157,7 +156,9 @@ hyphenate diccionario word =
           addPunctuation hyphennedWords punctuation
         else []
 
--- Function 8
+-- Recibe un diccionario de palabras, un limite de linea y una linea (Funcion h)
+-- Retorna las distintas maneras de partir la linea de forma que
+-- cumpla con el limite establecido
 lineBreaks :: HypMap -> Int -> Line -> [(Line, Line)]
 lineBreaks _ 0 _ = []
 lineBreaks _ _ [] = []
@@ -171,17 +172,21 @@ lineBreaks diccionario limit line
         wordToBeHyphenned = head (snd splittedLine)
         -- Utilizar hyphenate para buscar las posibles formas de partir la palabra
         posibleHyphens = hyphenate diccionario wordToBeHyphenned
+        -- Recibe una line partida en dos y los hyphens posibles para la ultima palabra
+        -- Retorna la linea partida con los hyphens
+        addHyphensToSplittedLine :: (Line, Line) -> [(Token, Token)] -> [(Line, Line)]
+        addHyphensToSplittedLine _ [] = []
+        addHyphensToSplittedLine splittedLine (x : xs) =
+          let leftSideOfLine = fst splittedLine ++ [fst x]
+              -- Eliminar la primer parte de la segunda linea para agregar la segunda parte
+              -- de la palabra partida en 2
+              rightSideOfLine = [snd x] ++ drop 1 (snd splittedLine)
+           in (leftSideOfLine, rightSideOfLine) : (addHyphensToSplittedLine splittedLine xs)
      in -- Verificar si no hay manera de partir la ultima palabra
         if posibleHyphens == []
           then [splittedLine]
-          else splittedLine : (filter (\x -> lineLength (fst x) <= limit) (addHyphensToSplittedLine splittedLine posibleHyphens))
-
-addHyphensToSplittedLine :: (Line, Line) -> [(Token, Token)] -> [(Line, Line)]
-addHyphensToSplittedLine _ [] = []
-addHyphensToSplittedLine splittedLine (x : xs) =
-  let leftSideOfLine = fst splittedLine ++ [fst x]
-      rightSideOfLine = [snd x] ++ drop 1 (snd splittedLine)
-   in (leftSideOfLine, rightSideOfLine) : (addHyphensToSplittedLine splittedLine xs)
+          else -- Retornar aquellas lineas que si cumplen con el limite
+            splittedLine : (filter (\x -> lineLength (fst x) <= limit) (addHyphensToSplittedLine splittedLine posibleHyphens))
 
 -- Function #9
 insertBlanks :: Int -> Line -> Line
