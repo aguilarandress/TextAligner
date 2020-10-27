@@ -27,21 +27,15 @@ string2line texto = map Word (splitString texto)
     -- Verifica si el char es un espacio en blanco (un blank)
     isBlank :: Char -> Bool
     isBlank char = if char == ' ' then True else False
-    -- Obtiene el substring antes de un espacio
-    waitForBlank :: String -> String
-    waitForBlank [] = []
-    waitForBlank (x : xs)
-      | isBlank x = []
-      | otherwise = x : waitForBlank xs
     -- Toma un string y lo separa por espacios en blanco
     splitString :: String -> [String]
     splitString [] = []
     splitString (x : xs)
       | isBlank x = splitString xs
-      | otherwise = waitForBlank (x : xs) : splitString (restOfTheString)
+      | otherwise = (takeWhile (/= ' ') (x : xs)) : splitString (restOfTheString)
       where
         -- Se toma el string desde el espacio encontrado
-        restOfTheString = drop (length (waitForBlank (x : xs))) xs
+        restOfTheString = dropWhile (/= ' ') (x : xs)
 
 -- Recibe una line y la convierte en su forma de string (Funcion B)
 line2string :: Line -> String
