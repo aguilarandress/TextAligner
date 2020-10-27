@@ -188,32 +188,40 @@ lineBreaks diccionario limit line
           else -- Retornar aquellas lineas que si cumplen con el limite
             splittedLine : (filter (\x -> lineLength (fst x) <= limit) (addHyphensToSplittedLine splittedLine posibleHyphens))
 
--- Function #9
+-- Recibe un numero de blanks y una line
+-- Inserta el numero de blanks entre cada token de la line
 insertBlanks :: Int -> Line -> Line
 insertBlanks 0 line = line
 insertBlanks _ [] = []
 insertBlanks numberOfBlanks line
   | length line == 1 = line
   | otherwise =
-    let blanksPlaceholder = [[] | i <- [1 .. ((length line) - 1)]]
+    -- Placeholder para los Blanks entre las palabras
+    let blanksPlaceholder = replicate ((length line) - 1) []
+        -- Generar los blanks que van entre las palabras
         blanksList = createBlanks blanksPlaceholder numberOfBlanks 0
+        -- Recibe una lista de blanks, un numero de blanks y un indice
+        -- Genera listas de blanks hasta que se agote el numero de blanks
+        createBlanks :: [[Token]] -> Int -> Int -> [[Token]]
+        createBlanks [] _ _ = []
+        createBlanks listOfBlanks numberOfBlanks currentIndex
+          | numberOfBlanks == 0 = listOfBlanks
+          | otherwise =
+            -- Agregar Blank a lista de Blanks actual
+            let currentElementWithBlank = [(listOfBlanks !! currentIndex) ++ [Blank]]
+                elementsBeforeCurrent = (take currentIndex listOfBlanks)
+                elementsAfterCurrent = (drop (currentIndex + 1) listOfBlanks)
+                newListOfBlanks = (elementsBeforeCurrent) ++ (currentElementWithBlank) ++ (elementsAfterCurrent)
+             in if (length listOfBlanks) - 1 == currentIndex
+                  then createBlanks (newListOfBlanks) (numberOfBlanks - 1) 0
+                  else createBlanks (newListOfBlanks) (numberOfBlanks - 1) (currentIndex + 1)
+        -- Recibe una line y una lista de blanks
+        -- Le agrega a cada word sus respectivos blanks
+        addBlanksToWords :: Line -> [[Token]] -> Int -> Line
+        addBlanksToWords [] _ _ = []
+        addBlanksToWords line [] _ = line
+        addBlanksToWords (x : xs) blanks currentIndex =
+          if xs == []
+            then [x]
+            else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
      in addBlanksToWords line blanksList 0
-
-createBlanks :: [[Token]] -> Int -> Int -> [[Token]]
-createBlanks [] _ _ = []
-createBlanks listOfBlanks numberOfBlanks currentIndex
-  | numberOfBlanks == 0 = listOfBlanks
-  | otherwise =
-    let currentElement = listOfBlanks !! currentIndex
-        newListOfBlanks = (take currentIndex listOfBlanks) ++ [currentElement ++ [Blank]] ++ (drop (currentIndex + 1) listOfBlanks)
-     in if (length listOfBlanks) - 1 == currentIndex
-          then createBlanks (newListOfBlanks) (numberOfBlanks - 1) 0
-          else createBlanks (newListOfBlanks) (numberOfBlanks - 1) (currentIndex + 1)
-
-addBlanksToWords :: Line -> [[Token]] -> Int -> Line
-addBlanksToWords [] _ _ = []
-addBlanksToWords line [] _ = line
-addBlanksToWords (x : xs) blanks currentIndex =
-  if xs == []
-    then [x]
-    else [x] ++ (blanks !! currentIndex) ++ addBlanksToWords xs blanks (currentIndex + 1)
