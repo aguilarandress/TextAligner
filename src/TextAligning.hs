@@ -52,7 +52,6 @@ line2string line = take ((length stringResult) - 1) stringResult
 tokenLength :: Token -> Int
 tokenLength token = length (tokenToString' token)
 
--- TODO: Agregar caso cuando se tiene un blank
 -- Determina el largo de una line (Funcion D)
 lineLength :: Line -> Int
 lineLength [] = -1
