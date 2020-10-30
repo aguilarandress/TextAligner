@@ -1,10 +1,10 @@
 module Menu where
 
+import Data.List
 import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap)
 import System.IO
-import TextAligning
 import Prelude hiding (filter, lookup, map, null)
 
 type Estado = HypMap
@@ -52,6 +52,15 @@ mainloop estado = do
       let nuevoEstado = Map.insert palabra (words [if c == '-' then ' ' else c | c <- (tokens !! 2)]) estado
       putStrLn $ "Palabra " ++ palabra ++ " agregada"
       mainloop nuevoEstado
+    "save" -> do
+      let fileName = (tokens !! 1)
+      -- Crear file handle
+      outh <- openFile fileName WriteMode
+      -- Escribir en el archivo de salida el diccionario
+      saveFile outh (Map.toList estado)
+      hClose outh
+      putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys estado))) ++ " palabras cargadas")
+      mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
     _ -> do
@@ -66,6 +75,16 @@ addToken estado token silabas =
   if Map.member token estado
     then estado
     else Map.insert token silabas estado
+
+-- Recibe un handle de archivo de salida y una lista con la separacion
+-- de cada palabra
+-- Guarda en el archivo de salida el diccionario actual
+saveFile :: Handle -> [(String, [String])] -> IO ()
+saveFile _ [] = return ()
+saveFile outh ((k, v) : kvs) = do
+  -- Write line to file
+  hPutStrLn outh $ k ++ " " ++ (intercalate "-" v)
+  saveFile outh kvs
 
 -- Recibe el handle del archivo y el estado actual
 -- Carga el diccionario a partir de un handle del archivo
