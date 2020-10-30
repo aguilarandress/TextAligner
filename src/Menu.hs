@@ -4,16 +4,21 @@ import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap)
 import System.IO
-import TextAligning ()
+import TextAligning
 import Prelude hiding (filter, lookup, map, null)
 
 type Estado = HypMap
+
+hypMap :: HypMap
+hypMap =
+  Map.fromList
+    []
 
 -- main crea un Estado vacío e invoca a mainloop
 -- el cual recibe el Estado como parámetro
 main :: IO ()
 main = do
-  mainloop (Map.fromList [])
+  mainloop (hypMap)
 
 -- Ciclo de ejecución:
 --  1. Recibe un Estado
@@ -39,8 +44,14 @@ mainloop estado = do
       putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys nuevoEstado))) ++ " palabras cargadas")
       mainloop nuevoEstado
     "show" -> do
-      putStrLn (show estado)
+      putStrLn (drop 9 (show estado))
       mainloop estado
+    "ins" -> do
+      let palabra = (tokens !! 1)
+      -- Insertar en el nuevo estado la nueva palabra
+      let nuevoEstado = Map.insert palabra (words [if c == '-' then ' ' else c | c <- (tokens !! 2)]) estado
+      putStrLn $ "Palabra " ++ palabra ++ " agregada"
+      mainloop nuevoEstado
     "exit" -> do
       putStrLn "Saliendo..."
     _ -> do
@@ -68,5 +79,5 @@ loadDiccionario inh estado = do
       let fileLine = words (inpStr)
       let silabas = fileLine !! 1
       -- Insert new slot for diccionary
-      let nuevoEstado = addToken estado (head fileLine) (words [if c == ',' then ' ' else c | c <- silabas])
+      let nuevoEstado = addToken estado (head fileLine) (words [if c == '-' then ' ' else c | c <- silabas])
       loadDiccionario inh nuevoEstado
