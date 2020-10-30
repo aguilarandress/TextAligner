@@ -1,19 +1,24 @@
 module Menu where
 
+import Data.List
 import Data.Map ()
 import qualified Data.Map as Map
 import DataTypes (HypMap)
 import System.IO
-import TextAligning ()
 import Prelude hiding (filter, lookup, map, null)
 
 type Estado = HypMap
+
+hypMap :: HypMap
+hypMap =
+  Map.fromList
+    []
 
 -- main crea un Estado vacío e invoca a mainloop
 -- el cual recibe el Estado como parámetro
 main :: IO ()
 main = do
-  mainloop (Map.fromList [])
+  mainloop (hypMap)
 
 -- Ciclo de ejecución:
 --  1. Recibe un Estado
@@ -39,7 +44,22 @@ mainloop estado = do
       putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys nuevoEstado))) ++ " palabras cargadas")
       mainloop nuevoEstado
     "show" -> do
-      putStrLn (show estado)
+      putStrLn (drop 9 (show estado))
+      mainloop estado
+    "ins" -> do
+      let palabra = (tokens !! 1)
+      -- Insertar en el nuevo estado la nueva palabra
+      let nuevoEstado = Map.insert palabra (words [if c == '-' then ' ' else c | c <- (tokens !! 2)]) estado
+      putStrLn $ "Palabra " ++ palabra ++ " agregada"
+      mainloop nuevoEstado
+    "save" -> do
+      let fileName = (tokens !! 1)
+      -- Crear file handle
+      outh <- openFile fileName WriteMode
+      -- Escribir en el archivo de salida el diccionario
+      saveFile outh (Map.toList estado)
+      hClose outh
+      putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys estado))) ++ " palabras cargadas")
       mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
@@ -56,6 +76,16 @@ addToken estado token silabas =
     then estado
     else Map.insert token silabas estado
 
+-- Recibe un handle de archivo de salida y una lista con la separacion
+-- de cada palabra
+-- Guarda en el archivo de salida el diccionario actual
+saveFile :: Handle -> [(String, [String])] -> IO ()
+saveFile _ [] = return ()
+saveFile outh ((k, v) : kvs) = do
+  -- Write line to file
+  hPutStrLn outh $ k ++ " " ++ (intercalate "-" v)
+  saveFile outh kvs
+
 -- Recibe el handle del archivo y el estado actual
 -- Carga el diccionario a partir de un handle del archivo
 loadDiccionario :: Handle -> Estado -> IO Estado
@@ -68,5 +98,5 @@ loadDiccionario inh estado = do
       let fileLine = words (inpStr)
       let silabas = fileLine !! 1
       -- Insert new slot for diccionary
-      let nuevoEstado = addToken estado (head fileLine) (words [if c == ',' then ' ' else c | c <- silabas])
+      let nuevoEstado = addToken estado (head fileLine) (words [if c == '-' then ' ' else c | c <- silabas])
       loadDiccionario inh nuevoEstado
