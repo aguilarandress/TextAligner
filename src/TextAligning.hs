@@ -125,6 +125,13 @@ hyphenate diccionario word =
       stringCombinations = mergers (diccionario Map.! wordWithoutPunctuation)
       -- Crear palabras con el hyphen
       hyphennedWords = map convertToHyphennedWord stringCombinations
+      -- Recibe un char y retorna un valor booleano dependiendo
+      -- de si es un simbolo de puntuacion o no
+      isPunctuationSymbol :: Char -> Bool
+      isPunctuationSymbol char =
+        if char == '.' || char == ';' || char == ','
+          then True
+          else False
       -- Recibe una lista de pares de tokens y la puntuacion
       -- Retorna la lista de pares de tokens con su puntuacion al final
       addPunctuation :: [(Token, Token)] -> String -> [(Token, Token)]
@@ -137,7 +144,7 @@ hyphenate diccionario word =
       -- Retorna un par en donde el primer campo es la palabra y el segundo es la puntuacion
       extractPunctuation :: String -> (String, String)
       extractPunctuation [] = ([], [])
-      extractPunctuation string = (reverse (dropWhile (== '.') (reverse string)), dropWhile (/= '.') string)
+      extractPunctuation string = (reverse (dropWhile (isPunctuationSymbol) (reverse string)), dropWhile (isPunctuationSymbol) string)
       -- Recibe un par de strings
       -- Retorna un par de la forma (HypWord, Word)
       convertToHyphennedWord :: (String, String) -> (Token, Token)
