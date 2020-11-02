@@ -116,7 +116,6 @@ enHyp =
 
 -- Recibe un diccionario de palabras y un token (Funcion G)
 -- Retorna las palabras de la forma (HypWord, Word)
--- TODO: Agregar mas casos para signos de puntuacion
 hyphenate :: HypMap -> Token -> [(Token, Token)]
 hyphenate diccionario word =
   let wordWithoutPunctuation = fst (extractPunctuation (tokenToString' word))
@@ -132,6 +131,11 @@ hyphenate diccionario word =
         if char == '.' || char == ';' || char == ','
           then True
           else False
+      isPunctuationSymbol' :: Char -> Bool
+      isPunctuationSymbol' char =
+        if char == '.' || char == ';' || char == ','
+          then False
+          else True
       -- Recibe una lista de pares de tokens y la puntuacion
       -- Retorna la lista de pares de tokens con su puntuacion al final
       addPunctuation :: [(Token, Token)] -> String -> [(Token, Token)]
@@ -144,7 +148,7 @@ hyphenate diccionario word =
       -- Retorna un par en donde el primer campo es la palabra y el segundo es la puntuacion
       extractPunctuation :: String -> (String, String)
       extractPunctuation [] = ([], [])
-      extractPunctuation string = (reverse (dropWhile (isPunctuationSymbol) (reverse string)), dropWhile (isPunctuationSymbol) string)
+      extractPunctuation string = (reverse (dropWhile (isPunctuationSymbol) (reverse string)), dropWhile (isPunctuationSymbol') string)
       -- Recibe un par de strings
       -- Retorna un par de la forma (HypWord, Word)
       convertToHyphennedWord :: (String, String) -> (Token, Token)
