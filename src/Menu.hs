@@ -3,8 +3,13 @@ module Menu where
 import Data.List
 import Data.Map ()
 import qualified Data.Map as Map
-import DataTypes (HypMap)
+import DataTypes
+  ( BanderaAjustar (AJUSTAR, NOAJUSTAR),
+    BanderaSeparar (NOSEPARAR, SEPARAR),
+    HypMap,
+  )
 import System.IO
+import TextAligning (separarYAlinear)
 import Prelude hiding (filter, lookup, map, null)
 
 type Estado = HypMap
@@ -45,6 +50,7 @@ mainloop estado = do
       mainloop nuevoEstado
     "show" -> do
       putStrLn (drop 9 (show estado))
+      putStrLn $ show (Map.member "así" estado)
       mainloop estado
     "ins" -> do
       let palabra = (tokens !! 1)
@@ -60,6 +66,18 @@ mainloop estado = do
       saveFile outh (Map.toList estado)
       hClose outh
       putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys estado))) ++ " palabras cargadas")
+      mainloop estado
+    "split" -> do
+      -- Obtener datos de entrada
+      let longitud = read (tokens !! 1) :: Int
+      let separar = if (tokens !! 2) == "n" then NOSEPARAR else SEPARAR
+      let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
+      -- Obtener texto del inpStr
+      let texto = drop (length (tokens !! 0) + length (tokens !! 1) + length (tokens !! 2) + length (tokens !! 3) + 4) (inpStr)
+      -- Separar y alinear texto
+      let strings = separarYAlinear estado longitud separar ajustar texto
+      -- Imprimir texto
+      printSeparatedStrings strings
       mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
@@ -100,3 +118,11 @@ loadDiccionario inh estado = do
       -- Insert new slot for diccionary
       let nuevoEstado = addToken estado (head fileLine) (words [if c == '-' then ' ' else c | c <- silabas])
       loadDiccionario inh nuevoEstado
+
+-- Recibe una lista de strings
+-- Imprime un string por linea en la terminal
+printSeparatedStrings :: [String] -> IO ()
+printSeparatedStrings [] = do putStr ""
+printSeparatedStrings (x : xs) = do
+  putStrLn x
+  printSeparatedStrings xs

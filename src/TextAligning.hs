@@ -220,9 +220,9 @@ insertBlanks numberOfBlanks line
      in addBlanksToWords line blanksList 0
 
 -- Funcion que recibe recibe un string y lo separa en una lista de strings (Funcion j)
-separarYAlinear :: Int -> BanderaSeparar -> BanderaAjustar -> String -> [String]
-separarYAlinear _ _ _ [] = []
-separarYAlinear limite separar ajustar string
+separarYAlinear :: HypMap -> Int -> BanderaSeparar -> BanderaAjustar -> String -> [String]
+separarYAlinear _ _ _ _ [] = []
+separarYAlinear diccionario limite separar ajustar string
   | separar == NOSEPARAR && ajustar == NOAJUSTAR =
     map line2string (brokenLines)
   | separar == NOSEPARAR && ajustar == AJUSTAR =
@@ -249,6 +249,8 @@ separarYAlinear limite separar ajustar string
     breakIntoLines' :: Int -> Line -> [Line]
     breakIntoLines' _ [] = []
     breakIntoLines' limit line =
-      let brokenLines = lineBreaks enHyp limit line
+      -- TODO: El diccionario esta alambrado
+      -- Se debe cambiar por el diccionario de estado en el menu
+      let brokenLines = lineBreaks diccionario limit line
           biggestLine = foldr1 (\x y -> if (length (fst x)) >= (length (fst y)) then x else y) brokenLines
        in (fst biggestLine) : breakIntoLines' limit (snd biggestLine)
