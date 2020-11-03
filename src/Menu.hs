@@ -84,6 +84,14 @@ mainloop estado = do
       let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
       -- Obtener nombre del archivo fuente
       let inputFile = tokens !! 4
+      -- Create handle
+      inh <- openFile inputFile ReadMode
+      -- Get file contents
+      inpuString <- loadInputFile inh ""
+      let resultStrings = separarYAlinear estado longitud separar ajustar (drop 1 inpuString)
+      hClose inh
+      -- putStrLn inpuString
+      printSeparatedStrings resultStrings
       mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
@@ -127,16 +135,17 @@ loadDiccionario inh estado = do
 
 -- Recibe el handle del archivo de entrada para el texto
 -- Retorna un string con todas las lineas
-loadInputFile :: Handle -> String
-loadInputFile inh = do
+loadInputFile :: Handle -> String -> IO String
+loadInputFile inh string = do
   -- Verificar EOF
   ineof <- hIsEOF inh
   if ineof
-    then ""
+    then return string
     else do
       -- Get line
       inpStr <- hGetLine inh
-      inpStr ++ " " ++ loadInputFile inh
+      let nuevoString = string ++ " " ++ inpStr
+      loadInputFile inh nuevoString
 
 -- Recibe una lista de strings
 -- Imprime un string por linea en la terminal
