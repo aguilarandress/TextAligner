@@ -50,7 +50,6 @@ mainloop estado = do
       mainloop nuevoEstado
     "show" -> do
       putStrLn (drop 9 (show estado))
-      putStrLn $ show (Map.member "así" estado)
       mainloop estado
     "ins" -> do
       let palabra = (tokens !! 1)
@@ -72,11 +71,10 @@ mainloop estado = do
       let longitud = read (tokens !! 1) :: Int
       let separar = if (tokens !! 2) == "n" then NOSEPARAR else SEPARAR
       let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
-      -- Obtener texto del inpStr
-      let texto = drop (length (tokens !! 0) + length (tokens !! 1) + length (tokens !! 2) + length (tokens !! 3) + 4) (inpStr)
+      let texto = intercalate " " (drop 4 tokens)
       -- Separar y alinear texto
       let strings = separarYAlinear estado longitud separar ajustar texto
-      -- Imprimir texto
+      -- -- Imprimir texto
       printSeparatedStrings strings
       mainloop estado
     "exit" -> do
