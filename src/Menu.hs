@@ -90,8 +90,12 @@ mainloop estado = do
       inpuString <- loadInputFile inh ""
       let resultStrings = separarYAlinear estado longitud separar ajustar (drop 1 inpuString)
       hClose inh
-      -- putStrLn inpuString
-      printSeparatedStrings resultStrings
+      if (length tokens) > 5
+        then do
+          let outputFile = tokens !! 5
+          outh <- openFile outputFile WriteMode
+          writeResultToFile outh resultStrings
+        else do printSeparatedStrings resultStrings
       mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
@@ -117,6 +121,15 @@ saveFile outh ((k, v) : kvs) = do
   -- Write line to file
   hPutStrLn outh $ k ++ " " ++ (intercalate "-" v)
   saveFile outh kvs
+
+-- Recibe un handle y una lista de strings
+-- Escribe en un archivo cada elemento de la lista
+-- en una linea del archivo
+writeResultToFile :: Handle -> [String] -> IO ()
+writeResultToFile _ [] = return ()
+writeResultToFile outh (x : xs) = do
+  hPutStrLn outh x
+  writeResultToFile outh xs
 
 -- Recibe el handle del archivo y el estado actual
 -- Carga el diccionario a partir de un handle del archivo
