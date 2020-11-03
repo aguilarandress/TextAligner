@@ -77,6 +77,14 @@ mainloop estado = do
       -- -- Imprimir texto
       printSeparatedStrings strings
       mainloop estado
+    "splitf" -> do
+      -- Obtener datos de entrada
+      let longitud = read (tokens !! 1) :: Int
+      let separar = if (tokens !! 2) == "n" then NOSEPARAR else SEPARAR
+      let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
+      -- Obtener nombre del archivo fuente
+      let inputFile = tokens !! 4
+      mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
     _ -> do
@@ -116,6 +124,19 @@ loadDiccionario inh estado = do
       -- Insert new slot for diccionary
       let nuevoEstado = addToken estado (head fileLine) (words [if c == '-' then ' ' else c | c <- silabas])
       loadDiccionario inh nuevoEstado
+
+-- Recibe el handle del archivo de entrada para el texto
+-- Retorna un string con todas las lineas
+loadInputFile :: Handle -> String
+loadInputFile inh = do
+  -- Verificar EOF
+  ineof <- hIsEOF inh
+  if ineof
+    then ""
+    else do
+      -- Get line
+      inpStr <- hGetLine inh
+      inpStr ++ " " ++ loadInputFile inh
 
 -- Recibe una lista de strings
 -- Imprime un string por linea en la terminal
