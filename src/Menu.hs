@@ -90,21 +90,29 @@ mainloop estado = do
       let longitud = read (tokens !! 1) :: Int
       let separar = if (tokens !! 2) == "n" then NOSEPARAR else SEPARAR
       let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
-      -- Obtener nombre del archivo fuente
+      -- Revisar si el archivo existe
       let inputFile = tokens !! 4
-      -- Create handle
-      inh <- openFile inputFile ReadMode
-      -- Get file contents
-      inpuString <- loadInputFile inh ""
-      let resultStrings = separarYAlinear estado longitud separar ajustar (drop 1 inpuString)
-      hClose inh
-      if (length tokens) > 5
+      fileExist <- doesFileExist inputFile
+      if not fileExist
         then do
-          let outputFile = tokens !! 5
-          outh <- openFile outputFile WriteMode
-          writeResultToFile outh resultStrings
-        else do printSeparatedStrings resultStrings
-      mainloop estado
+          putStrLn "**ERROR** El archivo ingresado no existe"
+          mainloop estado
+        else do
+          -- Create handle
+          inh <- openFile inputFile ReadMode
+          -- Get file contents
+          inpuString <- loadInputFile inh ""
+          let resultStrings = separarYAlinear estado longitud separar ajustar (drop 1 inpuString)
+          hClose inh
+          -- Check for file output
+          if (length tokens) > 5
+            then do
+              -- Save result
+              let outputFile = tokens !! 5
+              outh <- openFile outputFile WriteMode
+              writeResultToFile outh resultStrings
+            else do printSeparatedStrings resultStrings
+          mainloop estado
     "exit" -> do
       putStrLn "Saliendo..."
     _ -> do
