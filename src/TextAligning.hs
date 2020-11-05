@@ -260,7 +260,6 @@ separarYAlinear diccionario limite separar ajustar string
     breakIntoLines' :: Int -> Line -> [Line]
     breakIntoLines' _ [] = []
     breakIntoLines' limit line =
-      -- TODO: El diccionario esta alambrado
       -- Se debe cambiar por el diccionario de estado en el menu
       let brokenLines = lineBreaks diccionario limit line
           biggestLine = foldr1 (\x y -> if (length (fst x)) >= (length (fst y)) then x else y) brokenLines

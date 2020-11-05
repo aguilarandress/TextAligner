@@ -8,6 +8,7 @@ import DataTypes
     BanderaSeparar (NOSEPARAR, SEPARAR),
     HypMap,
   )
+import System.Directory (doesFileExist)
 import System.IO
 import TextAligning (separarYAlinear)
 import Prelude hiding (filter, lookup, map, null)
@@ -41,13 +42,20 @@ mainloop estado = do
     "load" -> do
       -- Get file name
       let nombreArchivo = (tokens !! 1)
-      -- Create handle
-      inh <- openFile nombreArchivo ReadMode
-      -- New state
-      nuevoEstado <- loadDiccionario inh estado
-      hClose inh
-      putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys nuevoEstado))) ++ " palabras cargadas")
-      mainloop nuevoEstado
+      -- Check if file exists for loading
+      fileExist <- doesFileExist nombreArchivo
+      if not fileExist
+        then do
+          putStrLn "**ERROR** El archivo ingresado no existe"
+          mainloop estado
+        else do
+          -- Create handle
+          inh <- openFile nombreArchivo ReadMode
+          -- New state
+          nuevoEstado <- loadDiccionario inh estado
+          hClose inh
+          putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys nuevoEstado))) ++ " palabras cargadas")
+          mainloop nuevoEstado
     "show" -> do
       putStrLn (drop 9 (show estado))
       mainloop estado
