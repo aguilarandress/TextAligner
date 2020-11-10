@@ -1,5 +1,5 @@
-razón ra-zón
-sinrazón sin-ra-zón
+razon ra-zon
+sinrazon sin-ra-zon
 hace ha-ce
 manera ma-ne-ra
 enflaquece en-fla-que-ce
@@ -16,10 +16,10 @@ pero pe-ro
 sienten sien-ten
 demasiado de-ma-sia-do
 vuelven vuel-ven
-así a-sí
+asi a-si
 poco po-co
 dormir dor-mir
 mucho mu-cho
 leer le-er
-secó se-có
+seco se-co
 celebro ce-le-bro

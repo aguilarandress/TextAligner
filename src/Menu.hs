@@ -10,11 +10,17 @@ import DataTypes
   )
 import System.Directory (doesFileExist)
 import System.IO
-import TextAligning (separarYAlinear)
+import TextAligning (separarYalinear)
 import Prelude hiding (filter, lookup, map, null)
+
+{-
+  * Andres Esteban Aguilar Moya - 2019156214
+  * Lenguajes de Programacion - Tarea programada #1
+-}
 
 type Estado = HypMap
 
+-- Estado actual
 hypMap :: HypMap
 hypMap =
   Map.fromList
@@ -22,8 +28,8 @@ hypMap =
 
 -- main crea un Estado vacío e invoca a mainloop
 -- el cual recibe el Estado como parámetro
-main :: IO ()
-main = do
+menu :: IO ()
+menu = do
   mainloop (hypMap)
 
 -- Ciclo de ejecución:
@@ -54,10 +60,11 @@ mainloop estado = do
           -- New state
           nuevoEstado <- loadDiccionario inh estado
           hClose inh
-          putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys nuevoEstado))) ++ " palabras cargadas")
+          putStrLn (("Diccionario cargado ") ++ "(" ++ (show (length (Map.keys nuevoEstado))) ++ " palabras)")
           mainloop nuevoEstado
     "show" -> do
-      putStrLn (drop 9 (show estado))
+      -- Imprimir diccionario
+      printDiccionario (Map.toList estado)
       mainloop estado
     "ins" -> do
       let palabra = (tokens !! 1)
@@ -72,24 +79,24 @@ mainloop estado = do
       -- Escribir en el archivo de salida el diccionario
       saveFile outh (Map.toList estado)
       hClose outh
-      putStrLn (("Diccionario cargado ") ++ (show (length (Map.keys estado))) ++ " palabras cargadas")
+      putStrLn (("Diccionario guardado ") ++ "(" ++ (show (length (Map.keys estado))) ++ " palabras)")
       mainloop estado
     "split" -> do
       -- Obtener datos de entrada
       let longitud = read (tokens !! 1) :: Int
-      let separar = if (tokens !! 2) == "n" then NOSEPARAR else SEPARAR
-      let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
+      let separar = if (tokens !! 2) == "s" then SEPARAR else NOSEPARAR
+      let ajustar = if (tokens !! 3) == "s" then AJUSTAR else NOAJUSTAR
       let texto = intercalate " " (drop 4 tokens)
       -- Separar y alinear texto
-      let strings = separarYAlinear estado longitud separar ajustar texto
+      let strings = separarYalinear estado longitud separar ajustar texto
       -- -- Imprimir texto
       printSeparatedStrings strings
       mainloop estado
     "splitf" -> do
       -- Obtener datos de entrada
       let longitud = read (tokens !! 1) :: Int
-      let separar = if (tokens !! 2) == "n" then NOSEPARAR else SEPARAR
-      let ajustar = if (tokens !! 3) == "n" then NOAJUSTAR else AJUSTAR
+      let separar = if (tokens !! 2) == "s" then SEPARAR else NOSEPARAR
+      let ajustar = if (tokens !! 3) == "s" then AJUSTAR else NOAJUSTAR
       -- Revisar si el archivo existe
       let inputFile = tokens !! 4
       fileExist <- doesFileExist inputFile
@@ -102,7 +109,7 @@ mainloop estado = do
           inh <- openFile inputFile ReadMode
           -- Get file contents
           inpuString <- loadInputFile inh ""
-          let resultStrings = separarYAlinear estado longitud separar ajustar (drop 1 inpuString)
+          let resultStrings = separarYalinear estado longitud separar ajustar (drop 1 inpuString)
           hClose inh
           -- Check for file output
           if (length tokens) > 5
@@ -137,6 +144,15 @@ saveFile outh ((k, v) : kvs) = do
   -- Write line to file
   hPutStrLn outh $ k ++ " " ++ (intercalate "-" v)
   saveFile outh kvs
+
+-- Recibe una lista con la separacion de cada palabra
+-- Imprime en la consola cada palabra con su respectiva separacion
+printDiccionario :: [(String, [String])] -> IO ()
+printDiccionario [] = return ()
+printDiccionario ((k, v) : kvs) = do
+  -- Imprimir linea
+  putStrLn $ k ++ " " ++ (intercalate "-" v)
+  printDiccionario kvs
 
 -- Recibe un handle y una lista de strings
 -- Escribe en un archivo cada elemento de la lista

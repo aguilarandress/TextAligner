@@ -106,14 +106,6 @@ mergers stringList
         leftSideConcat = concat (take (index + 1) (strings))
         rightSideConcat = concat (drop (index + 1) (strings))
 
-enHyp :: HypMap
-enHyp =
-  Map.fromList
-    [ ("controla", ["con", "tro", "la"]),
-      ("futuro", ["fu", "tu", "ro"]),
-      ("presente", ["pre", "sen", "te"])
-    ]
-
 -- Recibe un diccionario de palabras y un token (Funcion G)
 -- Retorna las palabras de la forma (HypWord, Word)
 hyphenate :: HypMap -> Token -> [(Token, Token)]
@@ -231,15 +223,19 @@ insertBlanks numberOfBlanks line
      in addBlanksToWords line blanksList 0
 
 -- Funcion que recibe recibe un string y lo separa en una lista de strings (Funcion j)
-separarYAlinear :: HypMap -> Int -> BanderaSeparar -> BanderaAjustar -> String -> [String]
-separarYAlinear _ _ _ _ [] = []
-separarYAlinear diccionario limite separar ajustar string
+separarYalinear :: HypMap -> Int -> BanderaSeparar -> BanderaAjustar -> String -> [String]
+separarYalinear _ _ _ _ [] = []
+separarYalinear diccionario limite separar ajustar string
+  -- NOSEPARAR Y NOAJUSTAR
   | separar == NOSEPARAR && ajustar == NOAJUSTAR =
     map line2string (brokenLines)
+  -- NOSEPARAR Y AJUSTAR
   | separar == NOSEPARAR && ajustar == AJUSTAR =
     map line2string ((adjustLines limite (init brokenLines)) ++ [last brokenLines])
+  -- SEPARAR Y NOAJUSTAR
   | separar == SEPARAR && ajustar == NOAJUSTAR =
     map line2string (brokenLinesWithHypen)
+  -- SEPARAR Y AJUSTAR
   | otherwise = map line2string ((adjustLines limite (init brokenLinesWithHypen)) ++ [last brokenLinesWithHypen])
   where
     brokenLines = breakIntoLines limite (string2line string)
@@ -260,7 +256,6 @@ separarYAlinear diccionario limite separar ajustar string
     breakIntoLines' :: Int -> Line -> [Line]
     breakIntoLines' _ [] = []
     breakIntoLines' limit line =
-      -- Se debe cambiar por el diccionario de estado en el menu
       let brokenLines = lineBreaks diccionario limit line
-          biggestLine = foldr1 (\x y -> if (length (fst x)) >= (length (fst y)) then x else y) brokenLines
+          biggestLine = (last brokenLines)
        in (fst biggestLine) : breakIntoLines' limit (snd biggestLine)

@@ -1,10 +1,7 @@
-module Lib
-  ( someFunc,
-  )
-where
+module Lib (startApplication) where
 
-import DataTypes ()
-import TextAligning ()
+import Menu (menu)
 
-someFunc :: IO ()
-someFunc = putStrLn "Hello World"
+-- Start main application
+startApplication :: IO ()
+startApplication = do menu
