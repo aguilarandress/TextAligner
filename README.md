@@ -5,13 +5,8 @@
 ## Quick start
 
 ```bash
-$ stack setup # Install the haskell compiler for the project
-
-$ stack build # Builds the project with the dependencies
-
-$ stack exec text-aligner-exe # Executes the project
-
-$ stack ghci # Runs the GHCI for the project
+# Compilar aplicación y crear ejecutable
+$ ghc Main.hs --make -o YOUR_APP_NAME
 ```
 
 ## Comandos
@@ -35,6 +30,10 @@ $ stack ghci # Runs the GHCI for the project
 # Termina el programa
 >> exit
 ```
+
+## Archivos de prueba
+
+En el folder `_resources/` se encuentran archivos de prueba para cargar dentro de la aplicación
 
 ## Curso
 

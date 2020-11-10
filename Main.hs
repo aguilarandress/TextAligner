@@ -1,4 +1,4 @@
-module Menu where
+module Main where
 
 import Data.List
 import Data.Map ()
@@ -28,8 +28,8 @@ hypMap =
 
 -- main crea un Estado vacío e invoca a mainloop
 -- el cual recibe el Estado como parámetro
-menu :: IO ()
-menu = do
+main :: IO ()
+main = do
   mainloop (hypMap)
 
 -- Ciclo de ejecución:
